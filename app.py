@@ -1,12 +1,24 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import json, os
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer
 
 app = Flask(__name__)
 app.secret_key = 'dein_geheimer_schluessel'
 
-USERS_FILE = 'users.json'
+# Mail-Konfiguration (z. B. Gmail SMTP)
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USERNAME'] = 'deine.gmail@gmail.com'  # DEINE ADRESSE HIER
+app.config['MAIL_PASSWORD'] = 'dein_app_passwort'       # APP-PASSWORT HIER
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
 
+mail = Mail(app)
+s = URLSafeTimedSerializer(app.secret_key)
+
+USERS_FILE = 'users.json'
 if not os.path.exists(USERS_FILE):
     with open(USERS_FILE, 'w') as f:
         json.dump({}, f)
@@ -29,27 +41,58 @@ def register():
         email = request.form['email']
         password = request.form['password']
         users = load_users()
+
         if email in users:
             flash('E-Mail existiert bereits.')
             return redirect(url_for('register'))
 
-        users[email] = {'password': generate_password_hash(password)}
+        users[email] = {
+            'password': generate_password_hash(password),
+            'verified': False
+        }
         save_users(users)
-        flash('Registrierung erfolgreich. Jetzt einloggen.')
+
+        # Verifizierungslink generieren und senden
+        token = s.dumps(email, salt='email-confirm')
+        link = url_for('confirm_email', token=token, _external=True)
+
+        msg = Message('MoodMixer – Bitte bestätige deine E-Mail', sender='deine.gmail@gmail.com', recipients=[email])
+        msg.body = f'Hallo! Klicke hier, um deine E-Mail zu bestätigen: {link}'
+        mail.send(msg)
+
+        flash('Registrierung erfolgreich. Bitte überprüfe deine E-Mail, um dein Konto zu aktivieren.')
         return redirect(url_for('index'))
     return render_template('register.html')
+
+@app.route('/confirm/<token>')
+def confirm_email(token):
+    try:
+        email = s.loads(token, salt='email-confirm', max_age=3600)
+    except:
+        flash('Der Bestätigungslink ist ungültig oder abgelaufen.')
+        return redirect(url_for('index'))
+
+    users = load_users()
+    if email in users:
+        users[email]['verified'] = True
+        save_users(users)
+        flash('E-Mail erfolgreich bestätigt. Du kannst dich jetzt einloggen.')
+    return redirect(url_for('index'))
 
 @app.route('/login', methods=['POST'])
 def login():
     email = request.form['email']
     password = request.form['password']
     users = load_users()
-    if email in users and check_password_hash(users[email]['password'], password):
-        session['user'] = email
-        return redirect(url_for('home'))
-    else:
-        flash('Login fehlgeschlagen.')
-        return redirect(url_for('index'))
+    if email in users:
+        if not users[email].get('verified'):
+            flash('Bitte bestätige zuerst deine E-Mail.')
+            return redirect(url_for('index'))
+        if check_password_hash(users[email]['password'], password):
+            session['user'] = email
+            return redirect(url_for('home'))
+    flash('Login fehlgeschlagen.')
+    return redirect(url_for('index'))
 
 @app.route('/home')
 def home():
@@ -80,7 +123,7 @@ def mood():
             "spotify": "https://open.spotify.com/embed/playlist/37i9dQZF1DX4WYpdgoIcn6"
         },
         "motivated": {
-            "quote": "Heute ist dein Tag!", 
+            "quote": "Heute ist dein Tag!",
             "spotify": "https://open.spotify.com/embed/playlist/37i9dQZF1DX76Wlfdnj7AP"
         }
     }
