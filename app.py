@@ -1,22 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-import json, os
+import json, os, re, random
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_mail import Mail, Message
-from itsdangerous import URLSafeTimedSerializer
 
 app = Flask(__name__)
 app.secret_key = 'dein_geheimer_schluessel'
-
-# Mail-Konfiguration (z. B. Gmail SMTP)
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USERNAME'] = 'deine.gmail@gmail.com'  # DEINE ADRESSE HIER
-app.config['MAIL_PASSWORD'] = 'dein_app_passwort'       # APP-PASSWORT HIER
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
-
-mail = Mail(app)
-s = URLSafeTimedSerializer(app.secret_key)
 
 USERS_FILE = 'users.json'
 if not os.path.exists(USERS_FILE):
@@ -31,6 +18,10 @@ def save_users(users):
     with open(USERS_FILE, 'w') as f:
         json.dump(users, f, indent=4)
 
+def is_valid_email(email):
+    pattern = r'^[\w\.-]+@[\w\.-]+\.\w{2,}$'
+    return re.match(pattern, email)
+
 @app.route('/')
 def index():
     return render_template('login.html')
@@ -42,57 +33,32 @@ def register():
         password = request.form['password']
         users = load_users()
 
+        if not is_valid_email(email):
+            flash('Bitte gib eine gültige E-Mail-Adresse ein.')
+            return redirect(url_for('register'))
+
         if email in users:
             flash('E-Mail existiert bereits.')
             return redirect(url_for('register'))
 
-        users[email] = {
-            'password': generate_password_hash(password),
-            'verified': False
-        }
+        users[email] = {'password': generate_password_hash(password)}
         save_users(users)
 
-        # Verifizierungslink generieren und senden
-        token = s.dumps(email, salt='email-confirm')
-        link = url_for('confirm_email', token=token, _external=True)
-
-        msg = Message('MoodMixer – Bitte bestätige deine E-Mail', sender='deine.gmail@gmail.com', recipients=[email])
-        msg.body = f'Hallo! Klicke hier, um deine E-Mail zu bestätigen: {link}'
-        mail.send(msg)
-
-        flash('Registrierung erfolgreich. Bitte überprüfe deine E-Mail, um dein Konto zu aktivieren.')
+        flash('Registrierung erfolgreich. Jetzt einloggen.')
         return redirect(url_for('index'))
     return render_template('register.html')
-
-@app.route('/confirm/<token>')
-def confirm_email(token):
-    try:
-        email = s.loads(token, salt='email-confirm', max_age=3600)
-    except:
-        flash('Der Bestätigungslink ist ungültig oder abgelaufen.')
-        return redirect(url_for('index'))
-
-    users = load_users()
-    if email in users:
-        users[email]['verified'] = True
-        save_users(users)
-        flash('E-Mail erfolgreich bestätigt. Du kannst dich jetzt einloggen.')
-    return redirect(url_for('index'))
 
 @app.route('/login', methods=['POST'])
 def login():
     email = request.form['email']
     password = request.form['password']
     users = load_users()
-    if email in users:
-        if not users[email].get('verified'):
-            flash('Bitte bestätige zuerst deine E-Mail.')
-            return redirect(url_for('index'))
-        if check_password_hash(users[email]['password'], password):
-            session['user'] = email
-            return redirect(url_for('home'))
-    flash('Login fehlgeschlagen.')
-    return redirect(url_for('index'))
+    if email in users and check_password_hash(users[email]['password'], password):
+        session['user'] = email
+        return redirect(url_for('home'))
+    else:
+        flash('Login fehlgeschlagen.')
+        return redirect(url_for('index'))
 
 @app.route('/home')
 def home():
@@ -112,23 +78,43 @@ def mood():
     moods = {
         "happy": {
             "quote": "Lächle, und die Welt lächelt mit dir.",
-            "spotify": "https://open.spotify.com/embed/playlist/37i9dQZF1DXdPec7aLTmlC"
+            "spotify": [
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DXdPec7aLTmlC",
+                "https://open.spotify.com/embed/playlist/1h0CEZCm6IbFTbxThn6Xcs",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWYBO1MoTDhZI"
+            ]
         },
         "sad": {
             "quote": "Auch Regen gehört zum Wachsen dazu.",
-            "spotify": "https://open.spotify.com/embed/playlist/37i9dQZF1DWVV27DiNWxkR"
+            "spotify": [
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWVV27DiNWxkR",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DX7qK8ma5wgG1",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DX3YSRoSdA634"
+            ]
         },
         "chill": {
             "quote": "Atme tief durch und lass los.",
-            "spotify": "https://open.spotify.com/embed/playlist/37i9dQZF1DX4WYpdgoIcn6"
+            "spotify": [
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DX4WYpdgoIcn6",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWSkMjlBZAZ07",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWTkIwO2HDifB"
+            ]
         },
         "motivated": {
             "quote": "Heute ist dein Tag!",
-            "spotify": "https://open.spotify.com/embed/playlist/37i9dQZF1DX76Wlfdnj7AP"
+            "spotify": [
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DX76Wlfdnj7AP",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DXdxcBWuJkbcy",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWZjqjZMudx9T"
+            ]
         }
     }
     data = moods.get(mood, {})
-    return render_template("mood_result.html", mood=mood, quote=data.get("quote"), spotify=data.get("spotify"))
+    quote = data.get("quote")
+    spotify_list = data.get("spotify", [])
+    spotify = random.choice(spotify_list) if spotify_list else ""
+
+    return render_template("mood_result.html", mood=mood, quote=quote, spotify=spotify)
 
 @app.route('/logout')
 def logout():
