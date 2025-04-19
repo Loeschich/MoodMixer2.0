@@ -6,7 +6,19 @@
 </head>
 <body>
   <h1>Willkommen {{ email }}!</h1>
-  <p>Du bist eingeloggt 🎉</p>
+  <p>Wie fühlst du dich heute?</p>
+
+  <form method="POST" action="/mood">
+    <select name="mood">
+      <option value="happy">😄 Glücklich</option>
+      <option value="sad">😢 Traurig</option>
+      <option value="chill">😌 Entspannt</option>
+      <option value="motivated">🔥 Motiviert</option>
+    </select><br><br>
+    <button type="submit">Mix my Mood</button>
+  </form>
+
+  <br>
   <a href="/logout">Logout</a>
 </body>
 </html>
