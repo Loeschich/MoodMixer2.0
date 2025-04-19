@@ -59,6 +59,34 @@ def home():
         flash('Bitte logge dich ein.')
         return redirect(url_for('index'))
 
+@app.route('/mood', methods=['POST'])
+def mood():
+    if 'user' not in session:
+        flash('Bitte einloggen.')
+        return redirect(url_for('index'))
+
+    mood = request.form['mood']
+    moods = {
+        "happy": {
+            "quote": "Lächle, und die Welt lächelt mit dir.",
+            "spotify": "https://open.spotify.com/embed/playlist/37i9dQZF1DXdPec7aLTmlC"
+        },
+        "sad": {
+            "quote": "Auch Regen gehört zum Wachsen dazu.",
+            "spotify": "https://open.spotify.com/embed/playlist/37i9dQZF1DWVV27DiNWxkR"
+        },
+        "chill": {
+            "quote": "Atme tief durch und lass los.",
+            "spotify": "https://open.spotify.com/embed/playlist/37i9dQZF1DX4WYpdgoIcn6"
+        },
+        "motivated": {
+            "quote": "Heute ist dein Tag!", 
+            "spotify": "https://open.spotify.com/embed/playlist/37i9dQZF1DX76Wlfdnj7AP"
+        }
+    }
+    data = moods.get(mood, {})
+    return render_template("mood_result.html", mood=mood, quote=data.get("quote"), spotify=data.get("spotify"))
+
 @app.route('/logout')
 def logout():
     session.pop('user', None)
