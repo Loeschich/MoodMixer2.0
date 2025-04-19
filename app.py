@@ -7,7 +7,6 @@ app.secret_key = 'dein_geheimer_schluessel'
 
 USERS_FILE = 'users.json'
 
-# Datei anlegen, wenn sie nicht existiert
 if not os.path.exists(USERS_FILE):
     with open(USERS_FILE, 'w') as f:
         json.dump({}, f)
@@ -81,7 +80,7 @@ def mood():
             "spotify": "https://open.spotify.com/embed/playlist/37i9dQZF1DX4WYpdgoIcn6"
         },
         "motivated": {
-            "quote": "Heute ist dein Tag!",
+            "quote": "Heute ist dein Tag!", 
             "spotify": "https://open.spotify.com/embed/playlist/37i9dQZF1DX76Wlfdnj7AP"
         }
     }
@@ -94,7 +93,5 @@ def logout():
     flash('Du wurdest ausgeloggt.')
     return redirect(url_for('index'))
 
-# Render braucht diese Startkonfiguration:
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(debug=True)
