@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Dein Mood-Verlauf</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f4;
+      padding: 40px;
+      text-align: center;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      margin: 10px 0;
+    }
+    a {
+      display: block;
+      margin-top: 20px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>🕓 Dein Mood-Verlauf</h1>
+  <ul>
+    {% for item in history %}
+      <li>{{ item.timestamp[:10] }} – {{ item.mood|capitalize }}</li>
+    {% else %}
+      <li>Kein Verlauf gefunden.</li>
+    {% endfor %}
+  </ul>
+
+  <a href="/home">⬅ Zurück</a>
+</body>
+</html>
