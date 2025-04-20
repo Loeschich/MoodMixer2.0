@@ -9,7 +9,6 @@ USERS_FILE = 'users.json'
 HISTORY_FILE = 'history.json'
 FAVS_FILE = 'favorites.json'
 
-# Hilfsfunktionen
 def load_json(filename):
     if os.path.exists(filename):
         with open(filename, 'r') as f:
@@ -104,7 +103,7 @@ def mood():
     history[session['user']] = user_history
     save_json(HISTORY_FILE, history)
 
-    # Favoriten speichern, wenn nicht doppelt
+    # Favoriten speichern (nicht doppelt)
     favorites = load_json(FAVS_FILE)
     user_favs = favorites.get(session['user'], [])
     exists = any(f['mood'] == mood and f['quote'] == data.get('quote') for f in user_favs)
@@ -147,13 +146,28 @@ def remove_favorite():
 
     return jsonify({'status': 'ok'})
 
+@app.route('/load_users_moods')
+def load_users_moods():
+    if 'user' not in session:
+        return jsonify([])
+    history = load_json(HISTORY_FILE)
+    result = []
+    for user, entries in history.items():
+        if entries:
+            latest = sorted(entries, key=lambda e: e['timestamp'], reverse=True)[0]
+            result.append({
+                'email': user,
+                'mood': latest['mood'],
+                'timestamp': latest['timestamp']
+            })
+    return jsonify(result)
+
 @app.route('/logout')
 def logout():
     session.pop('user', None)
     flash('Du wurdest ausgeloggt.')
     return redirect(url_for('index'))
 
-# Render-kompatibler Start
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
