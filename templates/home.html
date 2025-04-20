@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Home – MoodMixer</title>
+  <title>MoodMixer – Home</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <script>
     function showSection(id) {
@@ -37,24 +37,38 @@
             });
           });
       }
+
+      if (id === 'users') {
+        fetch('/load_users_moods')
+          .then(res => res.json())
+          .then(data => {
+            const list = document.getElementById('userMoodList');
+            list.innerHTML = '';
+            data.forEach(entry => {
+              const li = document.createElement('li');
+              li.textContent = `${entry.email} – ${entry.mood} (${entry.timestamp.slice(0, 10)})`;
+              list.appendChild(li);
+            });
+          });
+      }
     }
 
     function removeFavorite(mood, quote) {
       fetch('/remove_favorite', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ mood: mood, quote: quote })
+        body: JSON.stringify({ mood, quote })
       })
       .then(res => res.json())
       .then(data => {
         if (data.status === 'ok') {
-          showSection('favorites'); // neu laden
+          showSection('favorites');
         }
       });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      showSection('mood'); // Standardbereich
+      showSection('mood');
     });
   </script>
 </head>
@@ -67,12 +81,13 @@
       <button onclick="showSection('mood')">🎭 Stimmung wählen</button>
       <button onclick="showSection('favorites')">❤️ Favoriten</button>
       <button onclick="showSection('history')">📜 Verlauf</button>
+      <button onclick="showSection('users')">👥 Nutzer-Stimmungen</button>
       <button onclick="showSection('profile')">👤 Profil</button>
       <a href="/logout">🔓 Logout</a>
     </nav>
 
     <div id="mood" class="section">
-      <h2>Wie fühlst du dich?</h2>
+      <h2>Wie fühlst du dich heute?</h2>
       <form method="POST" action="/mood">
         <select name="mood" required>
           <option value="happy">😄 Glücklich</option>
@@ -90,8 +105,13 @@
     </div>
 
     <div id="history" class="section" style="display:none;">
-      <h2>📜 Mood-Verlauf</h2>
+      <h2>📜 Dein Mood-Verlauf</h2>
       <ul id="historyList"></ul>
+    </div>
+
+    <div id="users" class="section" style="display:none;">
+      <h2>👥 Aktuelle Nutzer-Stimmungen</h2>
+      <ul id="userMoodList"></ul>
     </div>
 
     <div id="profile" class="section" style="display:none;">
