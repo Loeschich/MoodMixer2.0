@@ -1,123 +1,82 @@
+<!-- 💾 Datei: home.html (überarbeitet als Single Page Interface) -->
 <!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MoodMixer – Startseite</title>
+  <title>MoodMixer</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <style>
-    :root {
-      --bg: #fef9f9;
-      --accent: #ff6f61;
-      --text: #333;
-    }
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to right, #fef9f9, #f4e2d8);
-      color: var(--text);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
-      min-height: 100vh;
-    }
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 0.5rem;
-    }
-    p {
-      font-size: 1.1rem;
-      margin-bottom: 2rem;
-    }
-    form {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.05);
-    }
-    select, button {
-      width: 100%;
-      padding: 0.8rem;
-      font-size: 1rem;
-      margin-bottom: 1rem;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background-color: var(--accent);
+    .section { display: none; }
+    .active { display: block; }
+    nav button {
+      margin: 5px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      background-color: #ff6f61;
       color: white;
-      font-weight: bold;
       cursor: pointer;
-      transition: background 0.3s;
     }
-    button:hover {
+    nav button:hover {
       background-color: #e45e50;
     }
-    .footer {
-      margin-top: 2rem;
-      font-size: 0.9rem;
-    }
-    .footer a {
-      color: var(--text);
-      text-decoration: none;
-      margin: 0 10px;
-    }
-    .features {
-      margin-top: 2rem;
-      text-align: left;
-      max-width: 600px;
-    }
-    .features ul {
-      line-height: 1.6;
-    }
   </style>
+  <script>
+    function showSection(id) {
+      const sections = document.querySelectorAll('.section');
+      sections.forEach(sec => sec.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+    window.onload = () => showSection('mood');
+  </script>
 </head>
 <body>
-  <h1>Willkommen bei MoodMixer 🎵</h1>
-  <p>Wähle deine aktuelle Stimmung und entdecke deinen Soundtrack!</p>
+  <div class="container">
+    <h1>Willkommen bei MoodMixer 🎧</h1>
+    <p>Hallo {{ email }} – wähle einen Bereich:</p>
 
-  <form method="POST" action="/mood">
-    <select name="mood" required>
-      <option value="happy">😄 Glücklich</option>
-      <option value="sad">😢 Traurig</option>
-      <option value="chill">😌 Entspannt</option>
-      <option value="motivated">🔥 Motiviert</option>
-    </select>
-    <button type="submit">Mix my Mood</button>
-  </form>
+    <!-- 🧭 Navigation -->
+    <nav>
+      <button onclick="showSection('mood')">🎵 Stimmung</button>
+      <button onclick="showSection('history')">🕓 Verlauf</button>
+      <button onclick="showSection('favorites')">⭐ Favoriten</button>
+      <button onclick="showSection('profile')">👤 Profil</button>
+      <a href="/logout"><button>🔒 Logout</button></a>
+    </nav>
 
-  <div class="footer">
-    <a href="/logout">Logout</a>
-    <a href="/favorites">Favoriten</a>
-    <a href="/profile">Profil</a>
-    <a href="/history">Verlauf</a>
-  </div>
+    <!-- 🎵 Abschnitt: Stimmung -->
+    <div id="mood" class="section">
+      <h2>Wie fühlst du dich heute?</h2>
+      <form method="POST" action="/mood">
+        <select name="mood" required>
+          <option value="happy">😄 Glücklich</option>
+          <option value="sad">😢 Traurig</option>
+          <option value="chill">😌 Entspannt</option>
+          <option value="motivated">🔥 Motiviert</option>
+        </select>
+        <button type="submit">Mix my Mood</button>
+      </form>
+    </div>
 
-  <div class="features">
-    <h3>✨ Features:</h3>
-    <ul>
-      <li>🔁 Zufällige Playlists für jede Stimmung</li>
-      <li>⭐ Stimmung als Favorit speichern</li>
-      <li>🕓 Verlauf deiner Emotionen</li>
-      <li>🎧 Integration mit Spotify-Player</li>
-      <li>📱 Optimiert für Handy und Tablet</li>
-      <li>🌙 Darkmode vorbereitet</li>
-      <li>🎨 Frisches, responsives Design</li>
-      <li>👤 Persönliches Profil geplant</li>
-      <li>📧 E-Mail-Formatprüfung</li>
-      <li>🧠 Psychologischer Mood-Quote-Mix</li>
-      <li>📅 Stimmungskalender (in Arbeit)</li>
-      <li>📊 Statistiken über deine Launen</li>
-      <li>🚀 Schnelle Ladezeiten</li>
-      <li>🔒 Sicherer Login</li>
-      <li>🌐 Online überall verfügbar</li>
-      <li>🔔 Flash-Nachrichten bei Fehlern</li>
-      <li>💾 Speicherung in JSON</li>
-      <li>💡 Zukunft: KI-Playlist-Vorschläge</li>
-      <li>👥 Community-Feature geplant</li>
-      <li>🎁 MoodMix Empfehlungen pro Woche</li>
-    </ul>
+    <!-- 🕓 Abschnitt: Verlauf (Platzhalter) -->
+    <div id="history" class="section">
+      <h2>Dein Verlauf</h2>
+      <p>Hier wird bald dein Mood-Verlauf angezeigt!</p>
+    </div>
+
+    <!-- ⭐ Abschnitt: Favoriten (Platzhalter) -->
+    <div id="favorites" class="section">
+      <h2>Deine Favoriten</h2>
+      <p>Hier erscheinen deine gespeicherten Lieblingsmoods.</p>
+    </div>
+
+    <!-- 👤 Abschnitt: Profil (Platzhalter) -->
+    <div id="profile" class="section">
+      <h2>Dein Profil</h2>
+      <p>Angemeldet als: <strong>{{ email }}</strong></p>
+      <p>Mehr Features folgen bald...</p>
+    </div>
   </div>
 </body>
 </html>
