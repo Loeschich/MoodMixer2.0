@@ -3,67 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MoodMixer – Willkommen</title>
+  <title>Registrieren – MoodMixer</title>
   <style>
     body {
-      margin: 0;
-      padding: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(120deg, #d4fc79, #96e6a1);
+      background: linear-gradient(to right, #ffecd2, #fcb69f);
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
     }
-    h1 {
-      font-size: 32px;
-      margin-bottom: 10px;
-    }
-    select, button {
-      padding: 12px;
-      margin: 12px;
+    .container {
+      background: white;
+      padding: 30px;
       border-radius: 10px;
-      border: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    input, button {
+      display: block;
+      margin: 10px auto;
+      padding: 12px;
       font-size: 16px;
-      min-width: 220px;
+      width: 250px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
     }
     button {
-      background-color: #333;
-      color: #fff;
+      background: #ff7e5f;
+      color: white;
+      border: none;
       cursor: pointer;
-      transition: 0.3s;
     }
-    button:hover {
-      background-color: #555;
-    }
-    .links {
-      margin-top: 30px;
-    }
-    .links a {
-      color: #333;
-      margin: 0 10px;
-      text-decoration: none;
+    a {
       font-size: 14px;
+      display: inline-block;
+      margin-top: 10px;
+      color: #333;
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
-  <h1>Willkommen zurück, {{ email }} 🎧</h1>
-  <p>Wie fühlst du dich heute?</p>
-
-  <form method="POST" action="/mood">
-    <select name="mood">
-      <option value="happy">😄 Glücklich</option>
-      <option value="sad">😢 Traurig</option>
-      <option value="chill">😌 Entspannt</option>
-      <option value="motivated">🔥 Motiviert</option>
-    </select><br>
-    <button type="submit">Zeig mir meine Stimmung</button>
-  </form>
-
-  <div class="links">
-    <a href="/logout">🔒 Logout</a>
+  <div class="container">
+    <h1>Registrieren</h1>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>{% for message in messages %}<li>{{ message }}</li>{% endfor %}</ul>
+      {% endif %}
+    {% endwith %}
+    <form method="POST" action="/register">
+      <input type="email" name="email" placeholder="E-Mail (z. B. name@mail.de)" required>
+      <input type="password" name="password" placeholder="Passwort" required>
+      <button type="submit">Registrieren</button>
+    </form>
+    <a href="/">Schon registriert? Jetzt einloggen</a>
   </div>
 </body>
 </html>
