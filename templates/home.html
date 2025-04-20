@@ -1,4 +1,4 @@
-<!-- 💾 Datei: home.html (überarbeitet als Single Page Interface) -->
+<!-- 💾 Datei: home.html (Single Page Interface mit Funktion) -->
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -27,6 +27,34 @@
       const sections = document.querySelectorAll('.section');
       sections.forEach(sec => sec.classList.remove('active'));
       document.getElementById(id).classList.add('active');
+
+      if (id === 'history') {
+        fetch('/load_history')
+          .then(res => res.json())
+          .then(data => {
+            const list = document.getElementById('historyList');
+            list.innerHTML = data.length ? '' : '<li>Keine Einträge.</li>';
+            data.forEach(entry => {
+              const li = document.createElement('li');
+              li.textContent = `${entry.timestamp.slice(0, 10)} – ${entry.mood}`;
+              list.appendChild(li);
+            });
+          });
+      }
+
+      if (id === 'favorites') {
+        fetch('/load_favorites')
+          .then(res => res.json())
+          .then(data => {
+            const list = document.getElementById('favoritesList');
+            list.innerHTML = data.length ? '' : '<li>Keine Favoriten gespeichert.</li>';
+            data.forEach(entry => {
+              const li = document.createElement('li');
+              li.textContent = `${entry.mood}: "${entry.quote}"`;
+              list.appendChild(li);
+            });
+          });
+      }
     }
     window.onload = () => showSection('mood');
   </script>
@@ -59,19 +87,19 @@
       </form>
     </div>
 
-    <!-- 🕓 Abschnitt: Verlauf (Platzhalter) -->
+    <!-- 🕓 Abschnitt: Verlauf -->
     <div id="history" class="section">
       <h2>Dein Verlauf</h2>
-      <p>Hier wird bald dein Mood-Verlauf angezeigt!</p>
+      <ul id="historyList"></ul>
     </div>
 
-    <!-- ⭐ Abschnitt: Favoriten (Platzhalter) -->
+    <!-- ⭐ Abschnitt: Favoriten -->
     <div id="favorites" class="section">
       <h2>Deine Favoriten</h2>
-      <p>Hier erscheinen deine gespeicherten Lieblingsmoods.</p>
+      <ul id="favoritesList"></ul>
     </div>
 
-    <!-- 👤 Abschnitt: Profil (Platzhalter) -->
+    <!-- 👤 Abschnitt: Profil -->
     <div id="profile" class="section">
       <h2>Dein Profil</h2>
       <p>Angemeldet als: <strong>{{ email }}</strong></p>
