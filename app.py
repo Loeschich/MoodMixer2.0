@@ -1,4 +1,4 @@
-# 💾 Datei: app.py (komplett überarbeitet – Mood, Verlauf, Favoriten)
+# 💾 Datei: app.py (Favoriten-Logik verbessert – ohne Duplikate, mit Löschen)
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 import json, os, datetime, random
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -115,10 +115,11 @@ def mood():
     history[session['user']] = user_history
     save_json(HISTORY_FILE, history)
 
-    # Favorit speichern
+    # Favorit speichern (nur wenn nicht vorhanden)
     favorites = load_json(FAV_FILE)
     user_favs = favorites.get(session['user'], [])
-    user_favs.append({"mood": mood, "quote": quote})
+    if not any(f['mood'] == mood and f['quote'] == quote for f in user_favs):
+        user_favs.append({"mood": mood, "quote": quote})
     favorites[session['user']] = user_favs
     save_json(FAV_FILE, favorites)
 
@@ -137,6 +138,20 @@ def load_favorites():
         return jsonify([])
     favorites = load_json(FAV_FILE)
     return jsonify(favorites.get(session['user'], []))
+
+@app.route('/remove_favorite', methods=['POST'])
+def remove_favorite():
+    if 'user' not in session:
+        return jsonify({'status': 'unauthorized'})
+    data = request.get_json()
+    mood = data.get('mood')
+    quote = data.get('quote')
+
+    favorites = load_json(FAV_FILE)
+    user_favs = favorites.get(session['user'], [])
+    favorites[session['user']] = [f for f in user_favs if f['mood'] != mood or f['quote'] != quote]
+    save_json(FAV_FILE, favorites)
+    return jsonify({'status': 'success'})
 
 @app.route('/logout')
 def logout():
