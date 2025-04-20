@@ -3,64 +3,121 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Registrieren – MoodMixer</title>
+  <title>MoodMixer – Startseite</title>
   <style>
+    :root {
+      --bg: #fef9f9;
+      --accent: #ff6f61;
+      --text: #333;
+    }
     body {
+      margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to right, #ffecd2, #fcb69f);
+      background: linear-gradient(to right, #fef9f9, #f4e2d8);
+      color: var(--text);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      padding: 2rem;
       min-height: 100vh;
     }
-    .container {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      text-align: center;
-    }
     h1 {
-      margin-bottom: 20px;
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
     }
-    input, button {
-      display: block;
-      margin: 10px auto;
-      padding: 12px;
-      font-size: 16px;
-      width: 250px;
+    p {
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+    form {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.05);
+    }
+    select, button {
+      width: 100%;
+      padding: 0.8rem;
+      font-size: 1rem;
+      margin-bottom: 1rem;
       border-radius: 8px;
       border: 1px solid #ccc;
     }
     button {
-      background: #ff7e5f;
+      background-color: var(--accent);
       color: white;
-      border: none;
+      font-weight: bold;
       cursor: pointer;
+      transition: background 0.3s;
     }
-    a {
-      font-size: 14px;
-      display: inline-block;
-      margin-top: 10px;
-      color: #333;
+    button:hover {
+      background-color: #e45e50;
+    }
+    .footer {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+    }
+    .footer a {
+      color: var(--text);
       text-decoration: none;
+      margin: 0 10px;
+    }
+    .features {
+      margin-top: 2rem;
+      text-align: left;
+      max-width: 600px;
+    }
+    .features ul {
+      line-height: 1.6;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Registrieren</h1>
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul>{% for message in messages %}<li>{{ message }}</li>{% endfor %}</ul>
-      {% endif %}
-    {% endwith %}
-    <form method="POST" action="/register">
-      <input type="email" name="email" placeholder="E-Mail (z. B. name@mail.de)" required>
-      <input type="password" name="password" placeholder="Passwort" required>
-      <button type="submit">Registrieren</button>
-    </form>
-    <a href="/">Schon registriert? Jetzt einloggen</a>
+  <h1>Willkommen bei MoodMixer 🎵</h1>
+  <p>Wähle deine aktuelle Stimmung und entdecke deinen Soundtrack!</p>
+
+  <form method="POST" action="/mood">
+    <select name="mood" required>
+      <option value="happy">😄 Glücklich</option>
+      <option value="sad">😢 Traurig</option>
+      <option value="chill">😌 Entspannt</option>
+      <option value="motivated">🔥 Motiviert</option>
+    </select>
+    <button type="submit">Mix my Mood</button>
+  </form>
+
+  <div class="footer">
+    <a href="/logout">Logout</a>
+    <a href="/favorites">Favoriten</a>
+    <a href="/profile">Profil</a>
+    <a href="/history">Verlauf</a>
+  </div>
+
+  <div class="features">
+    <h3>✨ Features:</h3>
+    <ul>
+      <li>🔁 Zufällige Playlists für jede Stimmung</li>
+      <li>⭐ Stimmung als Favorit speichern</li>
+      <li>🕓 Verlauf deiner Emotionen</li>
+      <li>🎧 Integration mit Spotify-Player</li>
+      <li>📱 Optimiert für Handy und Tablet</li>
+      <li>🌙 Darkmode vorbereitet</li>
+      <li>🎨 Frisches, responsives Design</li>
+      <li>👤 Persönliches Profil geplant</li>
+      <li>📧 E-Mail-Formatprüfung</li>
+      <li>🧠 Psychologischer Mood-Quote-Mix</li>
+      <li>📅 Stimmungskalender (in Arbeit)</li>
+      <li>📊 Statistiken über deine Launen</li>
+      <li>🚀 Schnelle Ladezeiten</li>
+      <li>🔒 Sicherer Login</li>
+      <li>🌐 Online überall verfügbar</li>
+      <li>🔔 Flash-Nachrichten bei Fehlern</li>
+      <li>💾 Speicherung in JSON</li>
+      <li>💡 Zukunft: KI-Playlist-Vorschläge</li>
+      <li>👥 Community-Feature geplant</li>
+      <li>🎁 MoodMix Empfehlungen pro Woche</li>
+    </ul>
   </div>
 </body>
 </html>
