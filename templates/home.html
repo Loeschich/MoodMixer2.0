@@ -1,42 +1,24 @@
-<!-- 💾 Datei: home.html (Single Page Interface mit Funktion) -->
 <!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MoodMixer</title>
+  <title>Home – MoodMixer</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <style>
-    .section { display: none; }
-    .active { display: block; }
-    nav button {
-      margin: 5px;
-      padding: 8px 16px;
-      border: none;
-      border-radius: 6px;
-      background-color: #ff6f61;
-      color: white;
-      cursor: pointer;
-    }
-    nav button:hover {
-      background-color: #e45e50;
-    }
-  </style>
   <script>
     function showSection(id) {
-      const sections = document.querySelectorAll('.section');
-      sections.forEach(sec => sec.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.section').forEach(el => el.style.display = 'none');
+      document.getElementById(id).style.display = 'block';
 
       if (id === 'history') {
         fetch('/load_history')
           .then(res => res.json())
           .then(data => {
             const list = document.getElementById('historyList');
-            list.innerHTML = data.length ? '' : '<li>Keine Einträge.</li>';
-            data.forEach(entry => {
+            list.innerHTML = '';
+            data.reverse().forEach(entry => {
               const li = document.createElement('li');
-              li.textContent = `${entry.timestamp.slice(0, 10)} – ${entry.mood}`;
+              li.textContent = `${entry.timestamp.slice(0,10)} – ${entry.mood}`;
               list.appendChild(li);
             });
           });
@@ -47,35 +29,50 @@
           .then(res => res.json())
           .then(data => {
             const list = document.getElementById('favoritesList');
-            list.innerHTML = data.length ? '' : '<li>Keine Favoriten gespeichert.</li>';
+            list.innerHTML = '';
             data.forEach(entry => {
               const li = document.createElement('li');
-              li.textContent = `${entry.mood}: "${entry.quote}"`;
+              li.innerHTML = `<strong>${entry.mood}</strong>: ${entry.quote} <button onclick="removeFavorite('${entry.mood}', \`${entry.quote}\`)">❌</button>`;
               list.appendChild(li);
             });
           });
       }
     }
-    window.onload = () => showSection('mood');
+
+    function removeFavorite(mood, quote) {
+      fetch('/remove_favorite', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ mood: mood, quote: quote })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'ok') {
+          showSection('favorites'); // neu laden
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      showSection('mood'); // Standardbereich
+    });
   </script>
 </head>
 <body>
   <div class="container">
-    <h1>Willkommen bei MoodMixer 🎧</h1>
-    <p>Hallo {{ email }} – wähle einen Bereich:</p>
+    <h1>MoodMixer 🎧</h1>
+    <p>Willkommen, {{ email }}!</p>
 
-    <!-- 🧭 Navigation -->
     <nav>
-      <button onclick="showSection('mood')">🎵 Stimmung</button>
-      <button onclick="showSection('history')">🕓 Verlauf</button>
-      <button onclick="showSection('favorites')">⭐ Favoriten</button>
+      <button onclick="showSection('mood')">🎭 Stimmung wählen</button>
+      <button onclick="showSection('favorites')">❤️ Favoriten</button>
+      <button onclick="showSection('history')">📜 Verlauf</button>
       <button onclick="showSection('profile')">👤 Profil</button>
-      <a href="/logout"><button>🔒 Logout</button></a>
+      <a href="/logout">🔓 Logout</a>
     </nav>
 
-    <!-- 🎵 Abschnitt: Stimmung -->
     <div id="mood" class="section">
-      <h2>Wie fühlst du dich heute?</h2>
+      <h2>Wie fühlst du dich?</h2>
       <form method="POST" action="/mood">
         <select name="mood" required>
           <option value="happy">😄 Glücklich</option>
@@ -87,23 +84,19 @@
       </form>
     </div>
 
-    <!-- 🕓 Abschnitt: Verlauf -->
-    <div id="history" class="section">
-      <h2>Dein Verlauf</h2>
-      <ul id="historyList"></ul>
-    </div>
-
-    <!-- ⭐ Abschnitt: Favoriten -->
-    <div id="favorites" class="section">
-      <h2>Deine Favoriten</h2>
+    <div id="favorites" class="section" style="display:none;">
+      <h2>❤️ Deine Favoriten</h2>
       <ul id="favoritesList"></ul>
     </div>
 
-    <!-- 👤 Abschnitt: Profil -->
-    <div id="profile" class="section">
-      <h2>Dein Profil</h2>
-      <p>Angemeldet als: <strong>{{ email }}</strong></p>
-      <p>Mehr Features folgen bald...</p>
+    <div id="history" class="section" style="display:none;">
+      <h2>📜 Mood-Verlauf</h2>
+      <ul id="historyList"></ul>
+    </div>
+
+    <div id="profile" class="section" style="display:none;">
+      <h2>👤 Profil</h2>
+      <p>E-Mail: <strong>{{ email }}</strong></p>
     </div>
   </div>
 </body>
