@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
-import os, json, re, datetime
+import os, json, re, datetime, random
 
 app = Flask(__name__)
 app.secret_key = 'dein_geheimer_schluessel'
@@ -76,22 +76,69 @@ def mood():
     moods = {
         "happy": {
             "quote": "Lächle, und die Welt lächelt mit dir.",
-            "spotify": "https://open.spotify.com/embed/playlist/37i9dQZF1DXdPec7aLTmlC"
+            "spotify": [
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DXdPec7aLTmlC",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DX1tyCD9QhIWF",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWU0ScTcjJBdj",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWYBO1MoTDhZI",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DX9XIFQuFvzM4",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DX3rxVfibe1L0",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DX3ZaylsKSCvK",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWZKx3oSvn1ka",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWXRqgorJj26U",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWYkaDif7Ztbp"
+            ]
         },
         "sad": {
             "quote": "Auch Regen gehört zum Wachsen dazu.",
-            "spotify": "https://open.spotify.com/embed/playlist/37i9dQZF1DWVV27DiNWxkR"
+            "spotify": [
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWVV27DiNWxkR",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DX7qK8ma5wgG1",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DX7gIoKXt0gmx",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWWv6MSZULLBi",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DX3YSRoSdA634",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DX3rxVfibe1L0",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DX5trt9i14X7j",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWU4EQPjP9ZpS",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWVIiR5qh2MFm",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWZeKCadgRdKQ"
+            ]
         },
         "chill": {
             "quote": "Atme tief durch und lass los.",
-            "spotify": "https://open.spotify.com/embed/playlist/37i9dQZF1DX4WYpdgoIcn6"
+            "spotify": [
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DX4WYpdgoIcn6",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DX889U0CL85jj",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DX3PIPIT6lEg5",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DX6VdMW310YC7",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWZqd5JICZI0u",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWXX4UT26fTi1",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWXLeA8Omikj7",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DXbITWG1ZJKYt",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DX4H7FFUM2osB",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWUa8ZRTfalHk"
+            ]
         },
         "motivated": {
             "quote": "Heute ist dein Tag!",
-            "spotify": "https://open.spotify.com/embed/playlist/37i9dQZF1DX76Wlfdnj7AP"
+            "spotify": [
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DX76Wlfdnj7AP",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWZjqjZMudx9T",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWZKx3oSvn1ka",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWZZbwlv3Vmtr",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWYBO1MoTDhZI",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWUVpAXiEPK8P",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWX83CujKHHOn",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DX1s9knjP51Oa",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DX2aneNMeYHQ8",
+                "https://open.spotify.com/embed/playlist/37i9dQZF1DWU6QmMWiv7mM"
+            ]
         }
     }
+
     data = moods.get(mood, {})
+    quote = data.get("quote", "Bleib motiviert!")
+    playlist = random.choice(data.get("spotify", []))
 
     # Verlauf speichern
     history = load_json(HISTORY_FILE)
@@ -106,13 +153,13 @@ def mood():
     # Favoriten speichern (nicht doppelt)
     favorites = load_json(FAVS_FILE)
     user_favs = favorites.get(session['user'], [])
-    exists = any(f['mood'] == mood and f['quote'] == data.get('quote') for f in user_favs)
+    exists = any(f['mood'] == mood and f['quote'] == quote for f in user_favs)
     if not exists:
-        user_favs.append({'mood': mood, 'quote': data.get('quote')})
+        user_favs.append({'mood': mood, 'quote': quote})
         favorites[session['user']] = user_favs
         save_json(FAVS_FILE, favorites)
 
-    return render_template("mood_result.html", mood=mood, quote=data.get("quote"), spotify=data.get("spotify"))
+    return render_template("mood_result.html", mood=mood, quote=quote, spotify=playlist)
 
 @app.route('/load_history')
 def load_history():
